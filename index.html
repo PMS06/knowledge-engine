@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Personal Knowledge Engine</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,900&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #f7f2e9;
+    --paper-deep: #efe7d8;
+    --ink: #211d17;
+    --ink-soft: #6b6155;
+    --accent: #8a3324;        /* oxblood */
+    --accent-soft: #8a332418;
+    --rule: #211d1726;
+    --serif: "Fraunces", Georgia, serif;
+    --sans: "Instrument Sans", sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background:
+      radial-gradient(1200px 500px at 80% -10%, var(--paper-deep), transparent 60%),
+      var(--paper);
+    color: var(--ink);
+    font-family: var(--sans);
+    line-height: 1.55;
+    min-height: 100vh;
+  }
+
+  main {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 4.5rem 1.5rem 6rem;
+  }
+
+  /* masthead */
+  header {
+    border-bottom: 3px double var(--rule);
+    padding-bottom: 1.6rem;
+    margin-bottom: 3rem;
+    animation: rise .6s ease both;
+  }
+  .kicker {
+    font-family: var(--sans);
+    font-size: .72rem;
+    font-weight: 600;
+    letter-spacing: .22em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  h1 {
+    font-family: var(--serif);
+    font-weight: 900;
+    font-size: clamp(2.2rem, 6vw, 3.2rem);
+    line-height: 1.05;
+    margin: .35rem 0 0;
+    letter-spacing: -.01em;
+  }
+
+  /* numbered steps */
+  section {
+    display: grid;
+    grid-template-columns: 3.4rem 1fr;
+    gap: 1.1rem;
+    margin: 2.4rem 0;
+    animation: rise .6s ease both;
+  }
+  section:nth-of-type(1) { animation-delay: .12s; }
+  section:nth-of-type(2) { animation-delay: .24s; }
+
+  .num {
+    font-family: var(--serif);
+    font-weight: 900;
+    font-size: 2.6rem;
+    line-height: 1;
+    color: var(--accent);
+    opacity: .85;
+  }
+  .step h2 {
+    font-family: var(--serif);
+    font-weight: 600;
+    font-size: 1.25rem;
+    margin: .2rem 0 .8rem;
+  }
+
+  .row { display: flex; gap: .7rem; flex-wrap: wrap; align-items: center; }
+
+  /* the real file input is hidden; this label is the visible control */
+  input[type="file"] { display: none; }
+  .file-label {
+    border: 1.5px dashed var(--ink-soft);
+    border-radius: 999px;
+    padding: .55rem 1.2rem;
+    cursor: pointer;
+    font-weight: 500;
+    color: var(--ink-soft);
+    transition: border-color .2s, color .2s, background .2s;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .file-label:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+  .file-label.has-file { border-style: solid; border-color: var(--accent); color: var(--accent); }
+
+  input[type="text"] {
+    flex: 1;
+    min-width: 240px;
+    font: 500 1.05rem var(--sans);
+    color: var(--ink);
+    background: transparent;
+    border: none;
+    border-bottom: 1.5px solid var(--ink-soft);
+    padding: .55rem .1rem;
+    outline: none;
+    transition: border-color .2s;
+  }
+  input[type="text"]::placeholder { color: var(--ink-soft); opacity: .7; font-style: italic; }
+  input[type="text"]:focus { border-color: var(--accent); }
+
+  button {
+    font: 600 .95rem var(--sans);
+    letter-spacing: .04em;
+    color: var(--paper);
+    background: var(--ink);
+    border: none;
+    border-radius: 999px;
+    padding: .6rem 1.5rem;
+    cursor: pointer;
+    transition: background .2s, transform .15s;
+  }
+  button:hover { background: var(--accent); transform: translateY(-1px); }
+  button:active { transform: translateY(0); }
+
+  /* status + answer */
+  #status {
+    min-height: 1.4em;
+    margin-top: 2.2rem;
+    font-size: .92rem;
+    color: var(--ink-soft);
+  }
+  #status.error { color: var(--accent); font-weight: 500; }
+  #status.busy::after {
+    content: "…";
+    animation: dots 1.2s steps(4) infinite;
+  }
+
+  #answer {
+    display: none;
+    margin-top: 1.2rem;
+    padding: 1.8rem 2rem;
+    background: #fffdf8;
+    border-left: 4px solid var(--accent);
+    box-shadow: 0 2px 14px #211d1714;
+    font-family: var(--serif);
+    font-size: 1.15rem;
+    line-height: 1.65;
+    white-space: pre-wrap;
+    animation: rise .45s ease both;
+  }
+  #answer::first-letter {
+    font-size: 1.6em;
+    font-weight: 600;
+    color: var(--accent);
+  }
+  #sources {
+    margin-top: .7rem;
+    font-size: .8rem;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+
+  @keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+  @keyframes dots { to { content: ""; } }
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div class="kicker">Retrieval-Augmented Generation</div>
+    <h1>Personal Knowledge Engine</h1>
+  </header>
+
+  <section>
+    <div class="num">1</div>
+    <div class="step">
+      <h2>Add a document to your library</h2>
+      <div class="row">
+        <label class="file-label" for="file" id="fileLabel">Choose a PDF…</label>
+        <input type="file" id="file" accept=".pdf">
+        <button id="uploadBtn">Index it</button>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="num">2</div>
+    <div class="step">
+      <h2>Ask it anything</h2>
+      <div class="row">
+        <input type="text" id="question" placeholder="What is the holiday policy?">
+        <button id="askBtn">Ask</button>
+      </div>
+    </div>
+  </section>
+
+  <div id="status"></div>
+  <div id="answer"></div>
+  <div id="sources"></div>
+</main>
+
+<script>
+// The backend lives here no matter how this page was opened (server, file://, editor preview).
+const API = "http://localhost:8010";
+
+const $ = id => document.getElementById(id);
+
+// One status line for everything: grey for progress, red for problems.
+const status = (msg, kind = "") => {
+  $("status").textContent = msg;
+  $("status").className = kind;
+};
+
+// Show the chosen filename on the label so you can see a file is actually selected.
+$("file").onchange = () => {
+  const file = $("file").files[0];
+  $("fileLabel").textContent = file ? file.name : "Choose a PDF…";
+  $("fileLabel").classList.toggle("has-file", !!file);
+};
+
+$("uploadBtn").onclick = async () => {
+  const file = $("file").files[0];
+  if (!file) return status("Choose a PDF first.", "error");
+  status("Reading, chunking and embedding", "busy");
+  try {
+    const form = new FormData();
+    form.append("file", file);
+    const res = await fetch(`${API}/upload`, { method: "POST", body: form });
+    const data = await res.json();
+    if (!res.ok) return status(data.detail, "error");
+    status(`Indexed ${data.file} as ${data.chunks} chunk(s). Ask away.`);
+  } catch (err) {
+    status(`Could not reach the server: ${err}. Is it running on :8010?`, "error");
+  }
+};
+
+$("askBtn").onclick = async () => {
+  const question = $("question").value.trim();
+  if (!question) return status("Type a question first.", "error");
+  status("Finding relevant passages and asking the model", "busy");
+  $("answer").style.display = "none";
+  $("sources").textContent = "";
+  try {
+    const res = await fetch(`${API}/ask`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ question }),
+    });
+    const data = await res.json();
+    if (!res.ok) return status(data.detail, "error");
+    status("");
+    $("answer").textContent = data.answer;
+    $("answer").style.display = "block";
+    $("sources").textContent = "Source: " + data.sources.join(", ");
+  } catch (err) {
+    status(`Could not reach the server: ${err}. Is it running on :8010?`, "error");
+  }
+};
+
+// Enter in the question box submits it.
+$("question").addEventListener("keydown", e => { if (e.key === "Enter") $("askBtn").click(); });
+</script>
+</body>
+</html>
